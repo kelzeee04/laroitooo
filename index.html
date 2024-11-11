@@ -1,0 +1,167 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Card Match Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(4, 100px);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 24px;
+            color: transparent;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .card.flipped {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+        .card.matched {
+            background-color: #2ecc71;
+            color: #fff;
+            pointer-events: none;
+        }
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            font-size: 24px;
+            text-align: center;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container" id="game-container"></div>
+    <div class="game-over" id="game-over" style="display: none;">
+        You Win! <br> 
+        <button onclick="startGame()">Play Again</button>
+    </div>
+
+    <script>
+        // Set up the game variables
+        const gameContainer = document.getElementById('game-container');
+        const gameOverScreen = document.getElementById('game-over');
+        let cards = [];
+        let flippedCards = [];
+        let matchedCards = 0;
+        let cardValues = ['🍎', '🍌', '🍒', '🍓', '🍍', '🍇', '🍉', '🍊'];
+        cardValues = [...cardValues, ...cardValues]; // Duplicate the values to create pairs
+        cardValues = shuffleArray(cardValues); // Shuffle the card values
+
+        // Start the game
+        function startGame() {
+            gameContainer.innerHTML = '';
+            cards = [];
+            flippedCards = [];
+            matchedCards = 0;
+            gameOverScreen.style.display = 'none';
+            cardValues = shuffleArray(cardValues);
+
+            // Create the cards and add them to the game container
+            for (let i = 0; i < cardValues.length; i++) {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.setAttribute('data-value', cardValues[i]);
+                card.addEventListener('click', flipCard);
+                gameContainer.appendChild(card);
+                cards.push(card);
+            }
+        }
+
+        // Shuffle function to randomize the card values
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap
+            }
+            return array;
+        }
+
+        // Flip the card
+        function flipCard(event) {
+            const card = event.target;
+            if (flippedCards.length < 2 && !card.classList.contains('flipped') && !card.classList.contains('matched')) {
+                card.classList.add('flipped');
+                card.textContent = card.getAttribute('data-value');
+                flippedCards.push(card);
+
+                // If two cards are flipped, check if they match
+                if (flippedCards.length === 2) {
+                    setTimeout(checkMatch, 1000);
+                }
+            }
+        }
+
+        // Check if the flipped cards match
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            if (card1.getAttribute('data-value') === card2.getAttribute('data-value')) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedCards++;
+                if (matchedCards === cardValues.length / 2) {
+                    setTimeout(showWinScreen, 500);
+                }
+            } else {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+                card1.textContent = '';
+                card2.textContent = '';
+            }
+            flippedCards = [];
+        }
+
+        // Show the win screen
+        function showWinScreen() {
+            gameOverScreen.style.display = 'block';
+        }
+
+        // Start the game initially
+        startGame();
+    </script>
+
+</body>
+</html>
